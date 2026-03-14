@@ -8,6 +8,16 @@ const router = createRouter({
       name: "home",
       component: HomeView,
     },
+    {
+      path: "/menu",
+      name: "menu",
+      component: () => import("../views/MenuView.vue"),
+    },
+    {
+      path: "/dashboard",
+      name: "dashboard",
+      component: () => import("../views/AdminDashboard.vue"),
+    },
   ],
 });
 export default router;

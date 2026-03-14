@@ -47,7 +47,7 @@ const categories = [
   {
     name: "Small Chops",
     itemCount: 8,
-    icon: "/chop-icon.webp",
+    icon: "/chop-icon.jpg",
     bgColor: "#F2EEFF",
   },
   { name: "Pastries", itemCount: 15, icon: "pastry.webp", bgColor: "#FFF2F5" },
@@ -96,7 +96,7 @@ const vAnimateOnScroll = {
           observer.unobserve(entry.target);
         }
       },
-      { threshold: 0.2 },
+      { threshold: 0.1 },
     );
     observer.observe(el);
     el._observer = observer;
@@ -111,25 +111,6 @@ const vAnimateOnScroll = {
 };
 </script>
 <template>
-  <nav class="nav-wrapper">
-    <div class="glass-header">
-      <div class="logo">
-        <img src="/kirah_treat_logo.png" alt="Logo" />
-      </div>
-
-      <ul class="nav-links">
-        <li v-for="link in links" :key="link.name">
-          <RouterLink :to="link.path" class="nav-item">
-            {{ link.name }}
-          </RouterLink>
-        </li>
-      </ul>
-
-      <div class="nav-cta">
-        <button class="join-btn">Order Now</button>
-      </div>
-    </div>
-  </nav>
   <div class="container">
     <div class="hero-section-container">
       <div class="hero-section">
@@ -170,7 +151,7 @@ const vAnimateOnScroll = {
 
       <div class="treat-grid">
         <div class="treat-card chops-bg" v-animate-on-scroll="'card-pop'">
-          <div class="icon-blob"><img src="/chop-icon.webp" alt="" /></div>
+          <div class="icon-blob"><img src="/chop-icon.jpg" alt="" /></div>
           <div class="decorative-shape circle-shape"></div>
           <h3>Spicy <br /><span class="special-font">Small Chops</span></h3>
           <p>
@@ -358,81 +339,110 @@ const vAnimateOnScroll = {
   </div>
 </template>
 <style scoped>
-.nav-wrapper {
-  position: fixed;
-  top: 20px;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: center;
-  z-index: 1000;
-  padding: 0 20px;
-}
-
-.glass-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  max-width: 1100px;
-  padding: 10px 15px;
-  /* Glassmorphism core */
-  background: rgba(255, 255, 255, 0.05); /* Very transparent */
-  backdrop-filter: blur(15px); /* This creates the frosted glass look */
-  -webkit-backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle white border */
-  border-radius: 100px; /* Makes it pill-shaped */
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-}
-
-.logo img {
-  height: 40px;
-  width: 40px;
-  border-radius: 50%;
-}
-
-.nav-links {
-  display: flex;
-  list-style: none;
-  gap: 10px;
-  margin: 0;
-  padding: 0;
-}
-
-.nav-item {
-  text-decoration: none;
-  color: #fff;
-  color: #7a4a3a;
-  font-size: 14px;
-  padding: 8px 18px;
-  border-radius: 50px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border: 1px solid #7a4a3a;
-  transition: all 0.3s ease;
-}
-
-.nav-item:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.join-btn {
-  /* Gradient matching your Burnt Orange palette */
-  background: linear-gradient(90deg, #f2994a 0%, #c05c3b 100%);
-  color: white;
-  border: none;
-  padding: 12px 28px;
-  border-radius: 50px;
-  font-weight: 600;
-  cursor: pointer;
-  font-size: 15px;
-  box-shadow: 0 4px 15px rgba(192, 92, 59, 0.3);
-}
-
-@media (max-width: 768px) {
-  .nav-links {
-    display: none; /* You'll need a mobile hamburger menu here later */
+/* Keyframe Animations */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
+
+@keyframes fadeRight {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeLeft {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes cardPop {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes heroContent {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes heroImage {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Animation Classes */
+.fade-up {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.fade-up.show {
+  animation: fadeUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.fade-right {
+  opacity: 0;
+  transform: translateX(-30px);
+  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.fade-right.show {
+  animation: fadeRight 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.fade-left {
+  opacity: 0;
+  transform: translateX(30px);
+  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.fade-left.show {
+  animation: fadeLeft 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.card-pop {
+  opacity: 0;
+  transform: translateY(20px) scale(0.95);
+  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.card-pop.show {
+  animation: cardPop 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
 /* hero section */
 .container {
   display: flex;
@@ -457,7 +467,7 @@ const vAnimateOnScroll = {
   align-items: center;
   max-width: 90%;
   width: 100%;
-  margin: 94px auto 64px;
+  margin: 150px auto 64px;
   gap: 16px;
 }
 .hero-content {
@@ -465,13 +475,11 @@ const vAnimateOnScroll = {
   flex-direction: column;
   gap: 35px;
   opacity: 0;
-  transform: translateX(-60px);
-  transition: all 0.8s ease;
+  transform: translateY(40px);
+  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 .hero-content.show {
-  opacity: 1;
-  transform: translateX(0px);
-  width: 100%;
+  animation: heroContent 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 .hero-content h1 {
   font-weight: 700;
@@ -518,9 +526,12 @@ const vAnimateOnScroll = {
   height: 50px;
   font-size: 19px;
   cursor: pointer;
+  transition: all 0.3s ease;
 }
 .hero-explore-btn:hover {
   background-color: #a04a2f;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(192, 92, 59, 0.3);
 }
 .hero-explore-btn span {
   display: flex;
@@ -541,6 +552,13 @@ const vAnimateOnScroll = {
   cursor: pointer;
   border: 2px solid #5d2a18;
   height: 50px;
+  transition: all 0.3s ease;
+}
+.hero-post-btn:hover {
+  background-color: #5d2a18;
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(93, 42, 24, 0.2);
 }
 .hero-image {
   /* max-width: 612px; */
@@ -548,12 +566,11 @@ const vAnimateOnScroll = {
   border: 10px solid #ffffff;
   border-radius: 24px;
   opacity: 0;
-  transform: translateX(60px);
-  transition: all 0.8s ease;
+  transform: translateY(40px) scale(0.95);
+  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 .hero-image.show {
-  opacity: 1;
-  transform: translateX(0px);
+  animation: heroImage 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.2s forwards;
 }
 .hero-image img {
   width: 100%;
@@ -683,6 +700,16 @@ const vAnimateOnScroll = {
   transform: translateY(-10px);
 }
 
+.treat-card:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.treat-card:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.treat-card:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
 /* Background Colors based on your Inspo but for Food */
 .chops-bg {
   background-color: #f2d5c4;
@@ -757,6 +784,13 @@ const vAnimateOnScroll = {
   cursor: pointer;
   font-weight: 600;
   font-family: Satoshi;
+  transition: all 0.3s ease;
+}
+
+.order-btn:hover {
+  background: #c05c3b;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(93, 42, 24, 0.3);
 }
 
 /* Category Section */
@@ -807,11 +841,35 @@ const vAnimateOnScroll = {
     box-shadow 0.3s ease;
   cursor: pointer;
   border: 1px solid rgba(0, 0, 0, 0.03);
+  transform: translateY(20px);
+}
+
+.category-item.show {
+  animation: fadeUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
 .category-item:hover {
   transform: translateY(-5px);
   box-shadow: 0 10px 20px rgba(93, 42, 24, 0.08);
+}
+
+.category-item:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.category-item:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.category-item:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.category-item:nth-child(4) {
+  animation-delay: 0.4s;
+}
+.category-item:nth-child(5) {
+  animation-delay: 0.5s;
+}
+.category-item:nth-child(6) {
+  animation-delay: 0.6s;
 }
 
 .icon-wrapper {
@@ -874,6 +932,7 @@ const vAnimateOnScroll = {
 .content-wrapper {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 60px;
 }
 
@@ -928,6 +987,25 @@ const vAnimateOnScroll = {
   display: flex;
   gap: 20px;
   align-items: flex-start;
+  transform: translateY(20px);
+  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.step-item.show {
+  animation: fadeUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.step-item:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.step-item:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.step-item:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.step-item:nth-child(4) {
+  animation-delay: 0.4s;
 }
 
 .number-circle {
@@ -983,6 +1061,13 @@ const vAnimateOnScroll = {
   cursor: pointer;
   box-shadow: 0 10px 20px rgba(192, 92, 59, 0.3);
   font-family: Satoshi;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background: #a04a2f;
+  transform: translateY(-2px);
+  box-shadow: 0 15px 25px rgba(192, 92, 59, 0.4);
 }
 
 .btn-outline {
@@ -994,6 +1079,14 @@ const vAnimateOnScroll = {
   font-weight: 600;
   cursor: pointer;
   font-family: Satoshi;
+  transition: all 0.3s ease;
+}
+
+.btn-outline:hover {
+  background: #c05c3b;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(192, 92, 59, 0.3);
 }
 
 @media (max-width: 900px) {
