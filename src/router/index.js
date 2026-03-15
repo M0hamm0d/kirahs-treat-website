@@ -18,6 +18,16 @@ const router = createRouter({
       name: "dashboard",
       component: () => import("../views/AdminDashboard.vue"),
     },
+    {
+      path: "/cart",
+      name: "cart",
+      component: () => import("../views/CartView.vue"),
+    },
+    {
+      path: "/login",
+      name: "login",
+      component: () => import("../views/AuthView.vue"),
+    },
   ],
 });
 export default router;

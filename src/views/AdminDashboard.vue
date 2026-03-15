@@ -233,6 +233,7 @@ async function saveProduct() {
 onMounted(async () => {
   await fetchCategory();
   let { data, error } = await supabase.from("MenuItem").select("*");
+  console.log(data, "data");
   menuItems.value = data.map((item) => ({
     ...item,
     options: item.options.map((opt) => JSON.parse(opt)),

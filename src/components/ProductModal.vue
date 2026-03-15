@@ -1,6 +1,8 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, h } from "vue";
+import { useCartStore } from "@/stores/cart";
 
+const cartStore = useCartStore();
 const props = defineProps({
   product: {
     type: Object,
@@ -32,15 +34,28 @@ function decrement() {
 
 function handleAddToCart() {
   const selection = props.product.options[selectedOptionIndex.value];
+  console.log(selection);
+  // const orderDetails = {
+  //   id: props.product.id,
+  //   name: props.product.name,
+  //   variant: selection.label,
+  //   pricePerUnit: selection.price,
+  //   quantity: quantity.value,
+  //   totalPrice: totalPrice.value,
+  // };
   const orderDetails = {
     id: props.product.id,
     name: props.product.name,
-    variant: selection.label,
-    pricePerUnit: selection.price,
+    description: props.product.description,
+    image: props.product.image,
+    hasOptions: props.product.options && props.product.options.length > 0,
+    variant: selection?.size,
+    pricePerUnit: selection?.price || props.product.basePrice,
     quantity: quantity.value,
     totalPrice: totalPrice.value,
   };
   console.log("Final Order:", orderDetails);
+  cartStore.cartItems.push({ ...orderDetails });
 }
 </script>
 

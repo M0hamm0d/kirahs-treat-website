@@ -66,18 +66,10 @@ onUnmounted(() => {
 
 const selectedCategory = ref("All");
 
-// const filteredMenu = computed(() => {
-//   if (selectedCategory.value === "All") return menuItems.value;
-//   return menuItems.value.filter(
-//     (item) => item.category === selectedCategory.value,
-//   );
-// });
-
 function addToCart(item) {
   openProductModal.value = true;
   selectedProduct.value = item;
   console.log("Added to cart:", { ...item });
-  // Here you would call your Pinia store action
 }
 const page = ref(1);
 function filterMenuByCategory(category, page = 1) {
