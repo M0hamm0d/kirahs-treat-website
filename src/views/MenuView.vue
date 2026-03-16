@@ -32,7 +32,7 @@ function goToSlide(index) {
 }
 
 function startTimer() {
-  slideInterval.value = setInterval(nextSlide, 50000);
+  slideInterval.value = setInterval(nextSlide, 5000);
 }
 
 function addToCartClickEmit() {
