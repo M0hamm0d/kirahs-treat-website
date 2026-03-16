@@ -32,7 +32,12 @@ function goToSlide(index) {
 }
 
 function startTimer() {
-  slideInterval.value = setInterval(nextSlide, 700000);
+  slideInterval.value = setInterval(nextSlide, 50000);
+}
+
+function addToCartClickEmit() {
+  console.log("çlose");
+  openProductModal.value = false;
 }
 
 async function fetchCategory() {
@@ -43,10 +48,6 @@ async function fetchCategory() {
     console.error("Error fetching categories:", error);
   } else {
     category.value = ["All", ...categories.map((cat) => cat.category)];
-    console.log(
-      category.value.map((cat) => cat),
-      "cat",
-    );
   }
 }
 
@@ -73,7 +74,6 @@ function addToCart(item) {
 }
 const page = ref(1);
 function filterMenuByCategory(category, page = 1) {
-  console.log(category, "mmm");
   const itemsPerPage = 6;
   const offset = (page - 1) * itemsPerPage;
 
@@ -257,7 +257,11 @@ watch(page, (newPage) => {
       </div>
     </div>
     <div class="" v-if="openProductModal">
-      <ProductModal :product="selectedProduct" @close="closeModal" />
+      <ProductModal
+        :product="selectedProduct"
+        @close="closeModal"
+        @addToCartClicked="addToCartClickEmit"
+      />
     </div>
   </section>
 </template>

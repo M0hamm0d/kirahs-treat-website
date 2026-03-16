@@ -4,6 +4,7 @@ import { RouterView } from "vue-router";
 import Header from "./components/Header.vue";
 import { supabase } from "@/supabase";
 import { useAuthStore } from "./stores/auth";
+import Footer from "./components/Footer.vue";
 const authStore = useAuthStore();
 let subscription;
 onMounted(async () => {
@@ -37,6 +38,7 @@ onUnmounted(() => {
 <template>
   <Header />
   <RouterView />
+  <Footer />
 </template>
 
 <style scoped></style>
