@@ -4,7 +4,7 @@ import { useCartStore } from "@/stores/cart";
 const cartStore = useCartStore();
 
 const handleCheckout = () => {
-  const phoneNumber = "2348123456789"; // Replace with Kirah's actual number
+  const phoneNumber = "2348064288340";
 
   // 1. Header & Branding
   let message = `🧁 *NEW ORDER: KIRAH'S TREAT* 🧁\n`;

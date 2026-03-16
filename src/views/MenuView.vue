@@ -268,7 +268,7 @@ watch(page, (newPage) => {
   position: relative;
   width: 100%;
   height: 60vh;
-  overflow: hidden;
+  /* overflow: hidden; */
   margin-top: -80px;
   background-color: #fdf8f0;
   padding: 230px 0 30px;
@@ -337,7 +337,7 @@ watch(page, (newPage) => {
 }
 /*Menu*/
 .menu-container {
-  padding: 100px 10%;
+  padding: 100px 5%;
   background-color: #fdf8f0;
   text-align: center;
   font-family: Satoshi;
@@ -394,6 +394,9 @@ watch(page, (newPage) => {
   transition: transform 0.3s ease;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.02);
   position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 .out-of-stock {
   position: absolute;
@@ -415,14 +418,15 @@ watch(page, (newPage) => {
 
 .img-container {
   width: 100%;
-  height: 200px;
+  height: 180px;
   overflow: hidden;
   border-radius: 15px;
 }
 
 .img-container img {
   width: 100%;
-  object-fit: contain; /* Keeps food looking realistic */
+  height: 100%;
+  object-fit: cover; /* Keeps food looking realistic */
   margin-bottom: 15px;
 }
 
@@ -582,6 +586,12 @@ watch(page, (newPage) => {
     width: 100%;
     justify-content: center;
   }
+  .slider-container {
+    height: 0vh;
+  }
+  .slider-dots {
+    display: none;
+  }
 }
 
 @media (max-width: 480px) {
@@ -594,6 +604,9 @@ watch(page, (newPage) => {
   .numbers {
     flex-wrap: wrap;
     justify-content: center;
+  }
+  .header-center h2 {
+    font-size: 32px;
   }
 }
 </style>

@@ -1276,4 +1276,9 @@ const vAnimateOnScroll = {
     text-align: center;
   }
 }
+@media (max-width: 600px) {
+  h2 {
+    font-size: 32px;
+  }
+}
 </style>

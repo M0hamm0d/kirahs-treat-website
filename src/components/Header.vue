@@ -178,6 +178,10 @@ console.log("auth authenticity", authStore.isAuthenticated);
   color: white;
   text-decoration: none;
 }
+.hamburger,
+.sidebar {
+  display: none;
+}
 
 @media (max-width: 768px) {
   .nav-links {
@@ -252,6 +256,7 @@ console.log("auth authenticity", authStore.isAuthenticated);
   }
   .sidebar-cta {
     margin-top: auto;
+    margin-bottom: 30px;
   }
   .sidebar-cta .auth {
     width: 100%;
