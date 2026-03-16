@@ -10,6 +10,8 @@ const props = defineProps({
   },
 });
 
+const emit = defineEmits(["addToCartClicked"]);
+
 const quantity = ref(1);
 const selectedOptionIndex = ref(0);
 
@@ -34,15 +36,6 @@ function decrement() {
 
 function handleAddToCart() {
   const selection = props.product.options[selectedOptionIndex.value];
-  console.log(selection);
-  // const orderDetails = {
-  //   id: props.product.id,
-  //   name: props.product.name,
-  //   variant: selection.label,
-  //   pricePerUnit: selection.price,
-  //   quantity: quantity.value,
-  //   totalPrice: totalPrice.value,
-  // };
   const orderDetails = {
     id: props.product.id,
     name: props.product.name,
@@ -54,8 +47,8 @@ function handleAddToCart() {
     quantity: quantity.value,
     totalPrice: totalPrice.value,
   };
-  console.log("Final Order:", orderDetails);
   cartStore.cartItems.push({ ...orderDetails });
+  emit("addToCartClicked");
 }
 </script>
 
@@ -317,5 +310,10 @@ function handleAddToCart() {
   background: #eee;
   color: #aaa;
   cursor: not-allowed;
+}
+@media (max-width: 600px) {
+  .modal-overlay {
+    padding: 0;
+  }
 }
 </style>

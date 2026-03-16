@@ -256,7 +256,7 @@ console.log("auth authenticity", authStore.isAuthenticated);
   }
   .sidebar-cta {
     margin-top: auto;
-    margin-bottom: 30px;
+    margin-bottom: 60px;
   }
   .sidebar-cta .auth {
     width: 100%;
