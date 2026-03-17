@@ -1,16 +1,36 @@
 <script setup>
-import { ref } from "vue";
+import { computed, onMounted, ref, toRaw } from "vue";
 import { useAuthStore } from "../stores/auth";
 import { supabase } from "@/supabase";
-const links = [
+const allLinks = [
   { name: "Home", path: "/" },
   { name: "Menu", path: "/menu" },
   { name: "Dashboard", path: "/dashboard" },
   { name: "Cart", path: "/cart" },
 ];
+const adminEmail = import.meta.env.VITE_ADMIN_EMAIL;
+const authStore = useAuthStore();
+const userSession = ref(null);
+// const user = ref(await supabase.auth.getUser());
+// console.log("user", toRaw(user.value));
+async function ccc() {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  console.log("session", session);
+}
+ccc();
+const filteredLink = computed(() => {
+  return allLinks.filter((link) => {
+    if (link.name === "Dashboard") {
+      return authStore.userSession?.user?.email === adminEmail;
+    } else {
+      return true;
+    }
+  });
+});
 const loading = ref(false);
 const sidebarOpen = ref(false);
-const authStore = useAuthStore();
 async function handleLogout() {
   loading.value = true;
   try {
@@ -34,7 +54,12 @@ async function handleLogout() {
     loading.value = false;
   }
 }
-console.log("auth authenticity", authStore.isAuthenticated);
+console.log(
+  "auth authenticity",
+  authStore.isAuthenticated,
+  "userSession",
+  authStore.userSession,
+);
 </script>
 <template>
   <nav class="nav-wrapper">
@@ -44,7 +69,7 @@ console.log("auth authenticity", authStore.isAuthenticated);
       </div>
 
       <ul class="nav-links">
-        <li v-for="link in links" :key="link.name">
+        <li v-for="link in filteredLink" :key="link.name">
           <RouterLink :to="link.path" class="nav-item">
             {{ link.name }}
           </RouterLink>
@@ -72,7 +97,7 @@ console.log("auth authenticity", authStore.isAuthenticated);
     <div class="sidebar" :class="{ show: sidebarOpen }">
       <button class="close-btn" @click="sidebarOpen = false">&times;</button>
       <ul class="sidebar-links">
-        <li v-for="link in links" :key="link.name">
+        <li v-for="link in filteredLink" :key="link.name">
           <RouterLink
             :to="link.path"
             class="sidebar-item"
@@ -159,6 +184,13 @@ console.log("auth authenticity", authStore.isAuthenticated);
 
 .nav-item:hover {
   background: rgba(255, 255, 255, 0.1);
+}
+
+.router-link-active {
+  background: #c05c3b !important;
+  color: white !important;
+  border-color: #c05c3b !important;
+  box-shadow: 0 4px 12px rgba(192, 92, 59, 0.2);
 }
 
 .join-btn,

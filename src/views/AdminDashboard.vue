@@ -16,6 +16,8 @@ const menuItems = ref([]);
 const editingItem = ref(false);
 const isLoading = ref(false);
 const isEditing = ref(false);
+const loadingProducts = ref(false);
+const loadingCategories = ref(false);
 
 const form = ref({
   name: "",
@@ -32,6 +34,7 @@ const categoryForm = ref({
 });
 
 async function fetchCategory() {
+  loadingCategories.value = true;
   let { data: categories, error } = await supabase
     .from("categories")
     .select("*");
@@ -41,6 +44,7 @@ async function fetchCategory() {
     category.value = categories.map((cat) => cat.category);
     // console.log(category.value);
   }
+  loadingCategories.value = false;
 }
 
 function resetForm() {
@@ -232,12 +236,14 @@ async function saveProduct() {
 }
 onMounted(async () => {
   await fetchCategory();
+  loadingProducts.value = true;
   let { data, error } = await supabase.from("MenuItem").select("*");
   console.log(data, "data");
   menuItems.value = data.map((item) => ({
     ...item,
     options: item.options.map((opt) => JSON.parse(opt)),
   }));
+  loadingProducts.value = false;
   if (error) {
     console.log(error);
   }
@@ -283,29 +289,47 @@ const vAnimateOnScroll = {
         <h2>Product List</h2>
         <!-- Render list of products here -->
         <div class="product-grid">
-          <div
-            v-for="item in menuItems"
-            :key="item.id"
-            class="product-card"
-            v-animate-on-scroll="'fade-up'"
-          >
-            <div class="img-container">
-              <img :src="item.image" :alt="item.name" />
-            </div>
-            <div class="card-body">
-              <h3>{{ item.name }}</h3>
-              <p>{{ item.description }}</p>
-              <div class="card-footer">
-                <!-- <span class="price"
-                  >₦{{
-                    item.hasOptions ? item.options[0].price : item.basePrice
-                  }}</span
-                > -->
-                <button class="edit" @click="editItem(item)">Edit</button>
-                <button class="delete" @click="deleteItem(item)">Delete</button>
+          <template v-if="loadingProducts">
+            <div v-for="n in 6" :key="n" class="skeleton-card">
+              <div class="skeleton-img"></div>
+              <div class="skeleton-body">
+                <div class="skeleton-title"></div>
+                <div class="skeleton-text"></div>
+                <div class="skeleton-footer">
+                  <div class="skeleton-btn"></div>
+                  <div class="skeleton-btn"></div>
+                </div>
               </div>
             </div>
-          </div>
+          </template>
+          <template v-else>
+            <div
+              v-for="(item, index) in menuItems"
+              :key="item.id"
+              class="product-card"
+              v-animate-on-scroll="'fade-up'"
+              :style="{ animationDelay: `${index * 0.1}s` }"
+            >
+              <div class="img-container">
+                <img :src="item.image" :alt="item.name" />
+              </div>
+              <div class="card-body">
+                <h3>{{ item.name }}</h3>
+                <p>{{ item.description }}</p>
+                <div class="card-footer">
+                  <!-- <span class="price"
+                    >₦{{
+                      item.hasOptions ? item.options[0].price : item.basePrice
+                    }}</span
+                  > -->
+                  <button class="edit" @click="editItem(item)">Edit</button>
+                  <button class="delete" @click="deleteItem(item)">
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          </template>
         </div>
       </div>
     </div>
@@ -317,26 +341,38 @@ const vAnimateOnScroll = {
       </div>
       <h2>Categories</h2>
       <div class="categories-grid">
-        <div
-          v-for="cat in category"
-          :key="cat"
-          class="category-card"
-          v-animate-on-scroll="'fade-up'"
-        >
-          <p class="">{{ cat }}</p>
-          <div class="actions">
-            <button class="edit" title="Edit" @click="editCategory(cat)">
-              Edit
-            </button>
-            <button
-              class="delete"
-              title="Delete"
-              @click="deleteCategory(cat.id)"
-            >
-              Delete
-            </button>
+        <template v-if="loadingCategories">
+          <div v-for="n in 4" :key="n" class="skeleton-category-card">
+            <div class="skeleton-category-title"></div>
+            <div class="skeleton-category-actions">
+              <div class="skeleton-btn-small"></div>
+              <div class="skeleton-btn-small"></div>
+            </div>
           </div>
-        </div>
+        </template>
+        <template v-else>
+          <div
+            v-for="(cat, index) in category"
+            :key="cat"
+            class="category-card"
+            v-animate-on-scroll="'fade-up'"
+            :style="{ animationDelay: `${index * 0.1}s` }"
+          >
+            <p class="">{{ cat }}</p>
+            <div class="actions">
+              <button class="edit" title="Edit" @click="editCategory(cat)">
+                Edit
+              </button>
+              <button
+                class="delete"
+                title="Delete"
+                @click="deleteCategory(cat.id)"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </template>
       </div>
     </div>
 
@@ -760,13 +796,15 @@ textarea {
   background: white;
   border-radius: 20px;
   padding: 20px;
-  transition: transform 0.3s ease;
+  transition:
+    transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.02);
 }
 
 .product-card:hover {
   transform: translateY(-10px);
-  box-shadow: 0 15px 30px rgba(93, 42, 24, 0.1);
+  box-shadow: 0 20px 40px rgba(93, 42, 24, 0.15);
 }
 
 .img-container {
@@ -848,6 +886,14 @@ textarea {
   border-radius: 10px;
   padding: 20px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition:
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.category-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(93, 42, 24, 0.1);
 }
 .add-category-modal {
   position: fixed;
@@ -986,11 +1032,121 @@ input[type="text"] {
   padding: 5px 8px;
   border-radius: 8px;
   cursor: pointer;
-  transition: 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .actions button:hover {
   border-color: #c05c3b;
-  transform: scale(1.1);
+  transform: scale(1.05);
+}
+
+/* Skeleton Loading Styles */
+.skeleton-card {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.02);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.skeleton-img {
+  width: 100%;
+  height: 200px;
+  border-radius: 15px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeleton-body {
+  text-align: left;
+}
+
+.skeleton-title {
+  height: 24px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.skeleton-text {
+  height: 16px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.skeleton-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.skeleton-btn {
+  height: 32px;
+  width: 60px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 10px;
+}
+
+.skeleton-category-card {
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.skeleton-category-title {
+  height: 20px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.skeleton-category-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.skeleton-btn-small {
+  height: 24px;
+  width: 40px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
 }
 </style>
