@@ -51,6 +51,7 @@
   padding-top: 60px;
   background-color: #fdf8f0;
   border-top: 1px solid #5d2a18;
+  font-family: Satoshi;
 }
 
 .footer-main {

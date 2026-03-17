@@ -1,8 +1,9 @@
 <script setup>
-import { ref, computed, h } from "vue";
-import { useCartStore } from "@/stores/cart";
+import { ref, computed, onMounted } from "vue";
+import { useToastComposable } from "../composables/useToast";
+import { useAuthStore } from "../stores/auth";
+import { supabase } from "@/supabase";
 
-const cartStore = useCartStore();
 const props = defineProps({
   product: {
     type: Object,
@@ -10,10 +11,14 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["addToCartClicked"]);
+const { successToast, errorToast } = useToastComposable();
+
+const emit = defineEmits(["addToCartClicked", "close"]);
 
 const quantity = ref(1);
 const selectedOptionIndex = ref(0);
+const authStore = useAuthStore();
+const isAddingToCart = ref(false);
 
 const totalPrice = computed(() => {
   if (props.product.options && props.product.options.length > 0) {
@@ -30,26 +35,103 @@ const totalPrice = computed(() => {
 function increment() {
   quantity.value++;
 }
+
 function decrement() {
   if (quantity.value > 1) quantity.value--;
 }
 
-function handleAddToCart() {
-  const selection = props.product.options[selectedOptionIndex.value];
-  const orderDetails = {
-    id: props.product.id,
-    name: props.product.name,
-    description: props.product.description,
-    image: props.product.image,
-    hasOptions: props.product.options && props.product.options.length > 0,
-    variant: selection?.size,
-    pricePerUnit: selection?.price || props.product.basePrice,
-    quantity: quantity.value,
-    totalPrice: totalPrice.value,
-  };
-  cartStore.cartItems.push({ ...orderDetails });
-  emit("addToCartClicked");
+async function handleAddToCart() {
+  try {
+    isAddingToCart.value = true;
+
+    if (!authStore?.userProfile?.id) {
+      errorToast("Please log in to add items to cart");
+      return;
+    }
+
+    const selection = props.product?.options?.[selectedOptionIndex.value];
+    const productId = props.product.id;
+
+    const orderDetails = {
+      user_id: authStore.userProfile.id,
+      product_id: productId,
+      name: props.product.name,
+      description: props.product.description,
+      image: props.product.image,
+      hasOptions: props.product.options && props.product.options.length > 0,
+      variant: selection?.size || null,
+      pricePerUnit: selection?.price || props.product.basePrice,
+      quantity: quantity.value,
+      totalPrice: totalPrice.value,
+    };
+
+    // Check for existing cart item
+    const { data: carts, error: fetchError } = await supabase
+      .from("carts")
+      .select("*")
+      .eq("user_id", authStore.userProfile.id)
+      .eq("product_id", productId);
+
+    if (fetchError) throw fetchError;
+
+    let existingItem = null;
+
+    if (orderDetails.hasOptions) {
+      existingItem = carts?.find(
+        (item) =>
+          item.product_id === productId &&
+          item.variant === orderDetails.variant,
+      );
+    } else {
+      existingItem = carts?.[0];
+    }
+
+    if (existingItem) {
+      const newQuantity = existingItem.quantity + orderDetails.quantity;
+      const newTotal = newQuantity * orderDetails.pricePerUnit;
+
+      const { error: updateError } = await supabase
+        .from("carts")
+        .update({
+          quantity: newQuantity,
+          totalPrice: newTotal,
+        })
+        .eq("id", existingItem.id);
+
+      if (updateError) throw updateError;
+    } else {
+      const { error: insertError } = await supabase
+        .from("carts")
+        .insert([orderDetails]);
+
+      if (insertError) throw insertError;
+    }
+
+    emit("addToCartClicked");
+    successToast(`${props.product.name} added to cart!`);
+
+    // Reset form
+    quantity.value = 1;
+    selectedOptionIndex.value = 0;
+
+    // Close modal after short delay
+    setTimeout(() => {
+      emit("close");
+    }, 500);
+  } catch (err) {
+    errorToast(err.message || "Failed to add item to cart");
+    console.error("Cart error:", err);
+  } finally {
+    isAddingToCart.value = false;
+  }
 }
+
+onMounted(() => {
+  console.log(
+    "Product modal mounted, user authenticated:",
+    authStore.isAuthenticated,
+  );
+});
 </script>
 
 <template>
@@ -119,12 +201,16 @@ function handleAddToCart() {
           :class="{
             'add-btn': true,
             stacked: true,
-            disabled: product.options[selectedOptionIndex]?.out_of_stock,
+            disabled:
+              product.options[selectedOptionIndex]?.out_of_stock ||
+              isAddingToCart,
           }"
           @click="handleAddToCart"
-          :disabled="product.options[selectedOptionIndex]?.out_of_stock"
+          :disabled="
+            product.options[selectedOptionIndex]?.out_of_stock || isAddingToCart
+          "
         >
-          Add To Cart
+          {{ isAddingToCart ? "Adding..." : "Add To Cart" }}
         </button>
       </div>
     </div>
@@ -132,6 +218,27 @@ function handleAddToCart() {
 </template>
 
 <style scoped>
+/* Modal Animations */
+@keyframes fadeInOverlay {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUpModal {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -144,6 +251,7 @@ function handleAddToCart() {
   justify-content: center;
   z-index: 2000;
   padding: 20px;
+  animation: fadeInOverlay 0.3s ease-out;
 }
 
 .modal-content {
@@ -158,6 +266,7 @@ function handleAddToCart() {
   padding: 30px;
   position: relative;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  animation: slideUpModal 0.4s ease-out;
 }
 .modal-content::-webkit-scrollbar {
   display: none;
@@ -172,6 +281,12 @@ function handleAddToCart() {
   font-size: 24px;
   color: #aaa;
   cursor: pointer;
+  transition: all 0.2s;
+}
+
+.close-btn:hover {
+  color: #5d2a18;
+  transform: scale(1.1);
 }
 
 .stacked-layout {
@@ -278,6 +393,13 @@ function handleAddToCart() {
   font-size: 18px;
   font-weight: 700;
   cursor: pointer;
+  transition: all 0.2s;
+}
+
+.quantity-control button:hover:not(:disabled) {
+  background-color: #c05c3b;
+  color: white;
+  transform: scale(1.1);
 }
 
 .quantity-control button:disabled {
@@ -301,19 +423,29 @@ function handleAddToCart() {
   cursor: pointer;
   font-size: 16px;
   box-shadow: 0 10px 20px rgba(192, 92, 59, 0.2);
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
-.add-btn.stacked:hover {
+.add-btn.stacked:hover:not(:disabled) {
   background-color: #a04a2f;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(192, 92, 59, 0.35);
 }
 .add-btn.stacked:disabled {
   background: #eee;
   color: #aaa;
   cursor: not-allowed;
 }
+
 @media (max-width: 600px) {
   .modal-overlay {
     padding: 0;
+  }
+
+  .modal-content {
+    border-radius: 12px;
   }
 }
 </style>

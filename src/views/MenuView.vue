@@ -11,6 +11,7 @@ const selectedProduct = ref(null);
 const products = ref([]);
 const totalPages = ref(0);
 const category = ref([]);
+const loading = ref(false);
 
 const slides = [
   { id: 1, name: "Zobo and Chops", image: "/kirah-zobo-chops.png" },
@@ -78,6 +79,7 @@ function filterMenuByCategory(category, page = 1) {
   const offset = (page - 1) * itemsPerPage;
 
   selectedCategory.value = category;
+  loading.value = true;
   if (category === "All") {
     supabase
       .from("MenuItem")
@@ -94,6 +96,7 @@ function filterMenuByCategory(category, page = 1) {
         } else {
           console.error("Error fetching menu items:", error);
         }
+        loading.value = false;
       });
   } else {
     supabase
@@ -112,6 +115,7 @@ function filterMenuByCategory(category, page = 1) {
         } else {
           console.error("Error fetching menu items:", error);
         }
+        loading.value = false;
       });
   }
 }
@@ -119,8 +123,19 @@ onMounted(() => {
   filterMenuByCategory("All");
 });
 function loadMore(pageNumber) {
+  const element = document.getElementById("menu-container");
   page.value = pageNumber;
   filterMenuByCategory(selectedCategory.value, page.value);
+  if (element) {
+    element.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }
+  // window.scrollTo({
+  //   top: 900,
+  //   behavior: "smooth",
+  // });
 }
 watch(selectedCategory, (newCategory) => {
   page.value = 1;
@@ -129,6 +144,30 @@ watch(selectedCategory, (newCategory) => {
 watch(page, (newPage) => {
   filterMenuByCategory(selectedCategory.value, newPage);
 });
+const vAnimateOnScroll = {
+  mounted(el, binding) {
+    const animationClass = binding.value || "fade-up";
+    el.classList.add(animationClass);
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("show");
+          observer.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.1 },
+    );
+    observer.observe(el);
+    el._observer = observer;
+  },
+  unmounted(el) {
+    if (el._observer) {
+      el._observer.unobserve(el);
+      el._observer.disconnect();
+      delete el._observer;
+    }
+  },
+};
 </script>
 
 <template>
@@ -159,7 +198,7 @@ watch(page, (newPage) => {
       ></span>
     </div>
   </div>
-  <section class="menu-container">
+  <section class="menu-container" id="menu-container">
     <div class="header-center">
       <h2>Our Regular <span>Menu Pack</span></h2>
     </div>
@@ -176,45 +215,64 @@ watch(page, (newPage) => {
     </div>
 
     <div class="product-grid">
-      <div
-        v-for="item in products"
-        :key="item.id"
-        class="product-card"
-        v-animate-on-scroll="'fade-up'"
-      >
-        <div class="out-of-stock" v-if="!item.hasOptions && item.out_of_stock">
-          Out of Stock
-        </div>
-        <div class="img-container">
-          <img :src="item.image" :alt="item.name" />
-        </div>
-        <div class="card-body">
-          <h3>{{ item.name }}</h3>
-          <p>{{ item.description }}</p>
-          <div class="card-footer">
-            <span class="price"
-              >₦{{
-                item.hasOptions ? item.options[0].price : item.basePrice
-              }}</span
-            >
-            <button
-              :class="{
-                'add-to-cart': true,
-                disabled: !item.hasOptions && item.out_of_stock,
-              }"
-              @click="addToCart(item)"
-              :disabled="!item.hasOptions && item.out_of_stock"
-            >
-              Add To Cart
-            </button>
+      <template v-if="loading">
+        <div v-for="n in 6" :key="n" class="skeleton-card">
+          <div class="skeleton-img"></div>
+          <div class="skeleton-body">
+            <div class="skeleton-title"></div>
+            <div class="skeleton-text"></div>
+            <div class="skeleton-footer">
+              <div class="skeleton-price"></div>
+              <div class="skeleton-btn"></div>
+            </div>
           </div>
         </div>
-      </div>
+      </template>
+      <template v-else>
+        <div
+          v-for="(item, index) in products"
+          :key="item.id"
+          class="product-card"
+          v-animate-on-scroll="'fade-up'"
+          :style="{ animationDelay: `${index * 0.1}s` }"
+        >
+          <div
+            class="out-of-stock"
+            v-if="!item.hasOptions && item.out_of_stock"
+          >
+            Out of Stock
+          </div>
+          <div class="img-container">
+            <img :src="item.image" :alt="item.name" />
+          </div>
+          <div class="card-body">
+            <h3>{{ item.name }}</h3>
+            <p>{{ item.description }}</p>
+            <div class="card-footer">
+              <span class="price"
+                >₦{{
+                  item.hasOptions ? item.options[0].price : item.basePrice
+                }}</span
+              >
+              <button
+                :class="{
+                  'add-to-cart': true,
+                  disabled: !item.hasOptions && item.out_of_stock,
+                }"
+                @click="addToCart(item)"
+                :disabled="!item.hasOptions && item.out_of_stock"
+              >
+                Add To Cart
+              </button>
+            </div>
+          </div>
+        </div>
+      </template>
     </div>
-    <div class="empty-state" v-if="products.length === 0">
+    <div class="empty-state" v-if="!loading && products.length === 0">
       <EmptyState @clear="filterMenuByCategory('All')" />
     </div>
-    <div class="load-more" v-if="totalPages > 1">
+    <div class="load-more" v-if="!loading && totalPages > 1">
       <div class="pagination-pill">
         <button
           class="arrow-btn"
@@ -332,7 +390,7 @@ watch(page, (newPage) => {
   border-radius: 50%;
   background-color: rgba(93, 42, 24, 0.4);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .slider-dots span.active {
@@ -374,7 +432,7 @@ watch(page, (newPage) => {
   color: #c05c3b;
   cursor: pointer;
   font-weight: 600;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .filter-pills button.active,
@@ -395,7 +453,9 @@ watch(page, (newPage) => {
   background: white;
   border-radius: 20px;
   padding: 20px;
-  transition: transform 0.3s ease;
+  transition:
+    transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.02);
   position: relative;
   display: flex;
@@ -417,7 +477,7 @@ watch(page, (newPage) => {
 
 .product-card:hover {
   transform: translateY(-10px);
-  box-shadow: 0 15px 30px rgba(93, 42, 24, 0.1);
+  box-shadow: 0 20px 40px rgba(93, 42, 24, 0.15);
 }
 
 .img-container {
@@ -475,7 +535,7 @@ watch(page, (newPage) => {
   cursor: pointer;
   font-size: 14px;
   font-weight: 600;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   font-family: Satoshi;
 }
 
@@ -491,6 +551,94 @@ watch(page, (newPage) => {
   border-color: #eee;
   cursor: not-allowed;
 }
+
+/* Skeleton Loading Styles */
+.skeleton-card {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.02);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.skeleton-img {
+  width: 100%;
+  height: 180px;
+  border-radius: 15px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeleton-body {
+  text-align: left;
+}
+
+.skeleton-title {
+  height: 24px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.skeleton-text {
+  height: 16px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.skeleton-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.skeleton-price {
+  height: 20px;
+  width: 60px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+.skeleton-btn {
+  height: 32px;
+  width: 100px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 50px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
 .load-more {
   display: flex;
   justify-content: center;
@@ -526,7 +674,7 @@ watch(page, (newPage) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .numbers button.active {
@@ -534,6 +682,7 @@ watch(page, (newPage) => {
   color: white;
   border-radius: 50%;
   box-shadow: 0 4px 15px rgba(192, 92, 59, 0.3);
+  transform: scale(1.1);
 }
 
 .arrow-btn {

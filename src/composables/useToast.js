@@ -1,5 +1,5 @@
 import { useToast } from "vue-toastification";
-export function useToast() {
+export function useToastComposable() {
   const toast = useToast();
   const successToast = (message) => {
     toast.success(message);
