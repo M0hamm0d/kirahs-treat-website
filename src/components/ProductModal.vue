@@ -44,6 +44,8 @@ async function handleAddToCart() {
   try {
     isAddingToCart.value = true;
 
+    console.log("auth store", authStore?.userProfile);
+
     if (!authStore?.userProfile?.id) {
       errorToast("Please log in to add items to cart");
       return;
