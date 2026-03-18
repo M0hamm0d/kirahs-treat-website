@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, toRaw } from "vue";
 import { useAuthStore } from "../stores/auth";
 import { supabase } from "@/supabase";
+import router from "../router";
 const allLinks = [
   { name: "Home", path: "/" },
   { name: "Menu", path: "/menu" },
@@ -47,11 +48,11 @@ async function handleLogout() {
       console.error("Sign out error:", error);
       throw err;
     }
-    sidebarOpen = false;
   } catch (err) {
     console.log(err);
   } finally {
     loading.value = false;
+    router.push("/");
   }
 }
 console.log(

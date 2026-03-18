@@ -48,17 +48,17 @@ onMounted(async () => {
   const { data } = await supabase.auth.getSession();
   console.log(data);
   const profile = ref({});
-  if (data?.session?.user.role === "authenticated") {
-    authStore.isAuthenticated = true;
-    profile.value = await ensureProfile(data?.session?.user);
-    console.log(profile.value);
-  } else {
-    authStore.isAuthenticated = false;
-    console.log("no session");
-  }
+  // if (data?.session?.user.role === "authenticated") {
+  //   authStore.isAuthenticated = true;
+  //   profile.value = await ensureProfile(data?.session?.user);
+  //   console.log(profile.value);
+  // } else {
+  //   authStore.isAuthenticated = false;
+  //   console.log("no session");
+  // }
   const { data: watchData } = supabase.auth.onAuthStateChange(
     async (event, session) => {
-      console.log("event", event, "session", session);
+      console.log("event", event, "session", session?.user?.role);
       authStore.userSession = session;
 
       if (event === "SIGNED_OUT") {
@@ -66,9 +66,10 @@ onMounted(async () => {
         authStore.userProfile = {};
         authStore.userSession = null;
         console.log(authStore.userProfile);
-      } else if (event === "SIGNED_IN") {
+      } else if (event === "SIGNED_IN" || event === "INITIAL_SESSION") {
         authStore.isAuthenticated = true;
-        authStore.userProfile = profile.value;
+        // authStore.userProfile = profile.value;
+        authStore.userProfile = await ensureProfile(session.user);
         authStore.userSession = session;
         console.log(authStore.userProfile);
       }
