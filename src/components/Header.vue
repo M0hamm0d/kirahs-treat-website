@@ -47,6 +47,7 @@ async function handleLogout() {
       console.error("Sign out error:", error);
       throw err;
     }
+    sidebarOpen = false;
   } catch (err) {
     console.log(err);
   } finally {
@@ -107,17 +108,15 @@ console.log(
         </li>
       </ul>
       <div class="sidebar-cta" v-if="!authStore.isAuthenticated">
-        <button class="auth">
-          <RouterLink to="/login" @click="sidebarOpen = false"
-            >Login</RouterLink
-          >
-        </button>
+        <RouterLink to="/login" @click="sidebarOpen = false" class="auth"
+          >Login</RouterLink
+        >
       </div>
       <div class="sidebar-cta" v-else>
         <button
           class="auth"
           @click="
-            handleLogout;
+            handleLogout();
             sidebarOpen = false;
           "
         >
@@ -292,8 +291,11 @@ console.log(
     margin-bottom: 60px;
   }
   .sidebar-cta .auth {
+    display: flex;
     width: 100%;
-    padding: 15px;
+    padding: 15px 0;
+    justify-content: center;
+    text-decoration: none;
     font-size: 16px;
   }
 }
