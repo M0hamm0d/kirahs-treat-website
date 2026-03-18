@@ -94,7 +94,6 @@ console.log(
       </button>
     </div>
 
-    <!-- Sidebar -->
     <div class="sidebar" :class="{ show: sidebarOpen }">
       <button class="close-btn" @click="sidebarOpen = false">&times;</button>
       <ul class="sidebar-links">
