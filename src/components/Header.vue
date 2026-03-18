@@ -10,7 +10,6 @@ const allLinks = [
 ];
 const adminEmail = import.meta.env.VITE_ADMIN_EMAIL;
 const authStore = useAuthStore();
-const userSession = ref(null);
 // const user = ref(await supabase.auth.getUser());
 // console.log("user", toRaw(user.value));
 async function ccc() {
@@ -249,11 +248,12 @@ console.log(
     border-right: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
     z-index: 1001;
-    padding: 20px;
+    padding: 20px 20px 20px 5px;
     display: flex;
     flex-direction: column;
     transform: translateX(-100%);
     transition: transform 0.3s ease;
+    font-family: Satoshi;
   }
   .sidebar.show {
     transform: translateX(0);
@@ -277,9 +277,10 @@ console.log(
     text-decoration: none;
     color: #7a4a3a;
     font-size: 18px;
-    padding: 15px 0;
+    padding: 15px 0 15px 15px;
     display: block;
     border-bottom: 1px solid rgba(122, 74, 58, 0.1);
+    border-radius: 8px;
     transition: all 0.3s ease;
   }
   .sidebar-item:hover {

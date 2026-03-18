@@ -121,15 +121,15 @@ const vAnimateOnScroll = {
             refreshing Zobo. Kirah’s Treat brings the party to your taste buds.
           </p>
           <div class="">
-            <RouterLink to="/discover">
+            <RouterLink to="/menu">
               <button class="hero-explore-btn">
                 <span>Explore the Menu</span>
                 <span><ArrowUp /></span>
               </button>
             </RouterLink>
-            <button class="hero-post-btn" @click="guardRoute('add-event')">
-              Order via WhatsApp
-            </button>
+            <RouterLink to="/cart">
+              <button class="hero-post-btn">Order via WhatsApp</button>
+            </RouterLink>
           </div>
         </div>
         <div v-animate-on-scroll="'hero-image'">
@@ -151,14 +151,18 @@ const vAnimateOnScroll = {
 
       <div class="treat-grid">
         <div class="treat-card chops-bg" v-animate-on-scroll="'card-pop'">
-          <div class="icon-blob"><img src="/chop-icon.jpg" alt="" /></div>
+          <div class="icon-blob">
+            <img src="/chop-icon.jpg" alt="" loading="lazy" />
+          </div>
           <div class="decorative-shape circle-shape"></div>
           <h3>Spicy <br /><span class="special-font">Small Chops</span></h3>
           <p>
             The perfect mix of samosas, spring rolls, and puff-puff for your
             events.
           </p>
-          <button class="order-btn">Order Now</button>
+          <RouterLink to="/menu">
+            <button class="order-btn">Order Now</button>
+          </RouterLink>
         </div>
 
         <div class="treat-card donuts-bg" v-animate-on-scroll="'card-pop'">
@@ -168,7 +172,9 @@ const vAnimateOnScroll = {
           <p>
             Soft, fluffy, and freshly glazed every morning. A true sweet treat.
           </p>
-          <button class="order-btn">Order Now</button>
+          <RouterLink to="/menu">
+            <button class="order-btn">Order Now</button>
+          </RouterLink>
         </div>
 
         <div class="treat-card zobo-bg" v-animate-on-scroll="'card-pop'">
@@ -179,7 +185,9 @@ const vAnimateOnScroll = {
             Natural hibiscus blend with a hint of ginger. Refreshing and
             healthy.
           </p>
-          <button class="order-btn">Order Now</button>
+          <RouterLink to="/menu">
+            <button class="order-btn">Order Now</button>
+          </RouterLink>
         </div>
       </div>
     </section>
@@ -215,7 +223,11 @@ const vAnimateOnScroll = {
     <section class="how-to-order">
       <div class="content-wrapper">
         <div class="visual-side" v-animate-on-scroll="'fade-right'">
-          <img src="/order-process-visual.webp" alt="Ordering Process" />
+          <img
+            src="/order-process-visual.webp"
+            alt="Ordering Process"
+            loading="lazy"
+          />
         </div>
 
         <div class="steps-side" v-animate-on-scroll="'fade-left'">
@@ -247,8 +259,12 @@ const vAnimateOnScroll = {
           </div>
 
           <div class="button-group">
-            <button class="btn-primary">Get Started</button>
-            <button class="btn-outline">View Menu</button>
+            <RouterLink to="/">
+              <button class="btn-primary">Get Started</button>
+            </RouterLink>
+            <RouterLink to="/menu">
+              <button class="btn-outline">View Menu</button>
+            </RouterLink>
           </div>
         </div>
       </div>

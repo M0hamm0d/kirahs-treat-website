@@ -175,15 +175,20 @@ const vAnimateOnScroll = {
     <div class="slider-content">
       <transition name="fade">
         <div v-show="activeSlide === 0" class="slide">
-          <img src="/menu-1.png" alt="Kirah's Treat Box Zobo & Small Chops" />
+          <img
+            src="/menu-1.png"
+            alt="Kirah's Treat Box Zobo & Small Chops"
+            loading="lazy"
+          />
         </div>
       </transition>
 
       <transition name="fade">
         <div v-show="activeSlide === 1" class="slide">
           <img
-            src="/menu-png2.png"
+            src="/menu-png2.jpeg"
             alt="Two women enjoying Kirah's Treat small chops and bliss"
+            loading="lazy"
           />
         </div>
       </transition>

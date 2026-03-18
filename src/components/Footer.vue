@@ -13,16 +13,16 @@
       <div class="footer-col">
         <ul class="footer-links">
           <li><RouterLink to="/">Home</RouterLink></li>
-          <li><RouterLink to="/about">About us</RouterLink></li>
+          <!-- <li><RouterLink to="/">About us</RouterLink></li> -->
           <li><RouterLink to="/menu">Our Menu</RouterLink></li>
-          <li><RouterLink to="/contact">Contact</RouterLink></li>
-          <li><RouterLink to="/testimonials">Testimonials</RouterLink></li>
+          <li><RouterLink to="/cart">Cart</RouterLink></li>
+          <!-- <li><RouterLink to="/">Testimonials</RouterLink></li> -->
         </ul>
       </div>
 
       <div class="footer-col contact-details">
-        <p>(+234) 800-KIRAH-TREAT</p>
-        <p>hello@kirahstreat.com</p>
+        <a href="tel:+2348064288340">+2348064288340</a>
+        <a href="wuraolashakirah4@gmail.com">wuraolashakirah4@gmail.com</a>
       </div>
 
       <div class="footer-col address">
@@ -101,6 +101,17 @@
   color: #c05c3b;
 }
 
+.contact-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.contact-details a {
+  margin-bottom: 12px;
+  color: #7a4a3a;
+  text-decoration: none;
+}
+
 .contact-details p,
 .address p {
   color: #7a4a3a;
@@ -120,6 +131,7 @@
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
+  justify-content: center;
   align-items: center;
 }
 
