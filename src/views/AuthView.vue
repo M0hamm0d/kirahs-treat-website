@@ -1,9 +1,14 @@
 <script setup>
 import { ref, computed } from "vue";
 import { supabase } from "@/supabase";
+import { useToastComposable } from "@/composables/useToast";
 
 const mode = ref("signin");
 const isLoading = ref(false);
+const errorMessage = ref("");
+
+const { successToast, errorToast } = useToastComposable();
+
 import { useRouter } from "vue-router";
 
 const router = useRouter();
@@ -17,55 +22,122 @@ const emailIsValid = computed(() => {
   return form.value.email.includes("@") && form.value.email.includes(".");
 });
 
+function setError(message) {
+  errorMessage.value = message;
+  errorToast(message);
+}
+
+function clearError() {
+  errorMessage.value = "";
+}
+
 function handleMode(param) {
   form.value = {
     email: "",
     password: "",
     name: "",
   };
+  errorMessage.value = "";
   mode.value = param;
 }
 
 const handleSignUp = async () => {
+  clearError();
+
+  if (!form.value.name.trim()) {
+    return setError("Please enter your name to sign up.");
+  }
+  if (!emailIsValid.value) {
+    return setError("Please provide a valid email address.");
+  }
+  if (form.value.password.length < 6) {
+    return setError("Password must be at least 6 characters long.");
+  }
+
   isLoading.value = true;
   try {
-    let { data, error: supabaseError } = await supabase.auth.signUp({
+    const { data, error: supabaseError } = await supabase.auth.signUp({
       email: form.value.email,
       password: form.value.password,
     });
+
     if (supabaseError) {
-      throw supabaseError;
+      const message =
+        supabaseError.message || "Could not sign up. Please try again.";
+      if (message.toLowerCase().includes("already exists")) {
+        return setError("Email is already registered. Please sign in.");
+      }
+      return setError(message);
     }
+
     const userId = data?.user?.id;
     if (userId) {
-      await supabase.from("profile").insert({
+      const { error: profileError } = await supabase.from("profile").insert({
         id: userId,
         user_name: form.value.name,
         user_email: form.value.email,
       });
+      if (profileError) {
+        console.error(profileError);
+        setError("Signed up but could not save profile. Please retry login.");
+      }
     }
-    console.log(data);
+
+    successToast("Account created successfully! You are now signed in.");
     router.push("/");
   } catch (err) {
-    console.log(err);
+    console.error(err);
+    const fallback =
+      err?.message || "Unexpected error during sign up. Please try again.";
+    setError(fallback);
   } finally {
     isLoading.value = false;
   }
-  //   console.log(`${mode.value} attempt for:`, form.value.email);
 };
+
 async function handleSignIn() {
+  clearError();
+
+  if (!emailIsValid.value) {
+    return setError("Please provide a valid email address.");
+  }
+  if (!form.value.password) {
+    return setError("Please enter your password.");
+  }
+
   isLoading.value = true;
   try {
     const { data, error } = await supabase.auth.signInWithPassword({
       email: form.value.email,
       password: form.value.password,
     });
+
     if (error) {
-      throw error;
+      const normalized = (error.message || "").toLowerCase();
+      if (normalized.includes("invalid login credentials")) {
+        return setError(
+          "No user found with these credentials. Check email/password or sign up.",
+        );
+      }
+      if (normalized.includes("email not confirmed")) {
+        return setError(
+          "Email not confirmed. Please check your inbox for verification link.",
+        );
+      }
+      return setError(error.message || "Could not sign in. Please try again.");
     }
+
+    if (!data?.user) {
+      return setError("Failed to sign in. User does not exist.");
+    }
+
+    successToast("Logged in successfully.");
     router.push("/");
   } catch (error) {
-    console.log(error);
+    console.error(error);
+    setError(
+      error?.message || "Unexpected error during sign in. Please try again.",
+    );
   } finally {
     isLoading.value = false;
   }
@@ -146,6 +218,8 @@ async function handleSignIn() {
           {{ isLoading ? "loading..." : "Sign up" }}
         </button>
       </form>
+
+      <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
 
       <!-- <div class="divider">
         <span>Or Continue With</span>
@@ -325,5 +399,16 @@ h2 {
   color: #999;
   line-height: 1.6;
   padding: 0 10px;
+}
+
+.error-message {
+  color: #c62828;
+  background: #fdecea;
+  border: 1px solid #f5c6cb;
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin-top: 10px;
+  font-weight: 600;
+  text-align: left;
 }
 </style>
