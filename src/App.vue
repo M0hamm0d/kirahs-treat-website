@@ -44,11 +44,9 @@ async function ensureProfile(user) {
   return existingUser;
 }
 
-// Use a ref for subscription to keep it reactive and safe
 const authSubscription = ref(null);
 
 onMounted(async () => {
-  // 1. Check for an existing session immediately on mount
   const {
     data: { session },
   } = await supabase.auth.getSession();
@@ -56,20 +54,18 @@ onMounted(async () => {
   if (session) {
     authStore.userSession = session;
     authStore.isAuthenticated = true;
-    // Pre-load profile so the UI doesn't "flicker"
     authStore.userProfile = await ensureProfile(session.user);
   }
 
-  // 2. Listen for future auth changes
   const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
     console.log(`Auth Event: ${event}`);
 
     if (event === "SIGNED_OUT") {
-      // Use $reset() to clear EVERYTHING in the store safely
       // authStore.$reset();
       authStore.isAuthenticated = false;
       authStore.userProfile = {};
       authStore.userSession = null;
+      localStorage.removeItem("auth");
       return;
     }
 
@@ -82,7 +78,6 @@ onMounted(async () => {
         authStore.userSession = session;
         authStore.isAuthenticated = true;
 
-        // Prevent redundant DB calls if profile is already loaded
         if (authStore.userProfile?.id !== session.user.id) {
           try {
             authStore.userProfile = await ensureProfile(session.user);

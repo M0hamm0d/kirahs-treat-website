@@ -13,13 +13,6 @@ const adminEmail = import.meta.env.VITE_ADMIN_EMAIL;
 const authStore = useAuthStore();
 // const user = ref(await supabase.auth.getUser());
 // console.log("user", toRaw(user.value));
-async function ccc() {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  console.log("session", session);
-}
-ccc();
 const filteredLink = computed(() => {
   return allLinks.filter((link) => {
     if (link.name === "Dashboard") {
